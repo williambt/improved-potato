@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
 import { environment } from '../environments/environment';
+import { start } from 'repl';
+import { Physics } from 'phaser';
+import { Bullet } from './Bullet'
 
 /**
  * Application component.
@@ -9,7 +12,7 @@ import { environment } from '../environments/environment';
   selector: 'app-root',
   templateUrl: `./app.component.html`
 })
-export class AppComponent {
+export class AppComponent extends Phaser.Scene {
   /**
    * Game instance.
    */
@@ -22,24 +25,98 @@ export class AppComponent {
     title: environment.title,
     version: environment.version,
     type: Phaser.AUTO,
-    width: 640,
-    height: 480,
+    width: 800,
+    height: 600,
     physics: {
       default: 'arcade',
       arcade: {
-          gravity: { y: 200 }
+          gravity: { y: 300 }
       }
     },
-    scene: {
-      preload: preload,
-      create: create
+    scene: this
+  }
+
+  player : Physics.Arcade.Sprite;
+  cursors : Phaser.Input.Keyboard.CursorKeys;
+  fireKey : Phaser.Input.Keyboard.Key;
+  speed : number = 200;
+
+  preload() : void
+  {
+    this.load.setBaseURL("../assets");
+    
+    this.load.image('sky', "sky.png");
+    this.load.image('player', "ball.png");
+    this.load.image('bullet1', "bullet1.png");
+  }
+  
+  create() : void
+  {
+    this.add.image(0, 0, 'sky').setOrigin(0, 0);
+
+    this.player = this.physics.add.sprite(400, 500, 'player');
+    this.player.body.allowGravity = false;
+    this.player.setCollideWorldBounds(true);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+
+  }
+
+  update() : void
+  {
+    if(this.cursors.left.isDown)
+    {
+      this.player.setVelocityX(-this.speed);
     }
+    else if (this.cursors.right.isDown)
+    {
+      this.player.setVelocityX(this.speed);
+    }
+    else
+    {
+      this.player.setVelocityX(0);
+    }
+
+    if(this.cursors.up.isDown)
+    {
+      this.player.setVelocityY(-this.speed);
+    }
+    else if (this.cursors.down.isDown)
+    {
+      this.player.setVelocityY(this.speed);
+    }
+    else
+    {
+      this.player.setVelocityY(0);
+    }
+
+    if(this.fireKey.isDown)
+    {
+      this.fire();
+      /*let bul = this.physics.add.sprite(this.player.body.position.x, this.player.body.position.y, 'bullet1');
+      bul.angle = -90;
+      bul.body.allowGravity = false;
+      bul.setVelocityY(-300);*/
+    }
+
+    for(let bul of this.bullets)
+    {
+    }
+  }
+
+  bullets : Bullet[] = [];
+  fire()
+  {
+    let bul = this.physics.add.sprite(this.player.body.position.x, this.player.body.position.y, 'bullet1');
+    bul.body.allowGravity = false;
+    this.bullets.push(new Bullet(bul, 300, -90));
   }
 
   /**
    * Instantiate application component.
    */
-  public constructor() { }
+  public constructor() { super({ key: 'sceneA', active: true }); }
 
   /**
    * Game ready event handler.
@@ -51,32 +128,8 @@ export class AppComponent {
   }
 }
 
-function preload() : void
+function collectStar(player, star : any) : void
 {
-  this.load.setBaseURL('http://labs.phaser.io');
-
-  this.load.image('sky', 'assets/skies/space3.png');
-  this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-  this.load.image('red', 'assets/particles/red.png');
-}
-
-function create() : void
-{
-  this.add.image(400, 300, 'sky');
-
-  var particles = this.add.particles('red');
-
-  var emitter = particles.createEmitter({
-      speed: 100,
-      scale: { start: 1, end: 0 },
-      blendMode: 'ADD'
-  });
-
-  var logo = this.physics.add.image(400, 100, 'logo');
-
-  logo.setVelocity(100, 200);
-  logo.setBounce(1, 1);
-  logo.setCollideWorldBounds(true);
-
-  emitter.startFollow(logo);
+  console.log(this.platforms);
+  star.disableBody(true, true);
 }

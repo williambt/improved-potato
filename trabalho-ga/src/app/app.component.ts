@@ -44,10 +44,28 @@ export class AppComponent extends Phaser.Scene {
 
   bulletSettings : BulletSettings = new BulletSettings(10, new Phaser.Math.Vector2(0,-90),1/3, -90);
 
+  enemies : Enemy[] = [];
+
   // player stats
   readonly maxHealth : number = 100;
   health : number = this.maxHealth;
 
+  score : number = 0;
+
+  //Use these to set HUD related values
+  setScore(score : number) : void
+  {
+    this.score = score;
+    this.updateScoreDisplay();
+  }
+
+  addScore(ammount : number) : void
+  {
+    this.score += ammount;
+    this.updateScoreDisplay();
+  }
+
+  
   setHealth(health : number) : void
   {
     this.health = health;
@@ -55,7 +73,7 @@ export class AppComponent extends Phaser.Scene {
     else if (this.health < 0) this.health = 0;
     this.setHealthBarStyle();
   }
-
+  
   addHealth(ammount : number) : void
   {
     this.health += ammount;
@@ -63,7 +81,8 @@ export class AppComponent extends Phaser.Scene {
     else if (this.health < 0) this.health = 0;
     this.setHealthBarStyle();
   }
-
+  
+  //HUD Updaters
   setHealthBarStyle() : void
   {
     let healthBar : HTMLElement = (document.getElementById("health").getElementsByClassName("fore")[0] as HTMLElement);
@@ -71,8 +90,13 @@ export class AppComponent extends Phaser.Scene {
     healthBar.style.backgroundColor = this.health > this.maxHealth / 2 ? 'green' : this.health > this.maxHealth / 5 ? 'yellow' : 'red';
     healthBar.innerText = this.health + '/' + this.maxHealth;
   }
+  updateScoreDisplay() : void
+  {
+    this.score = Math.floor(this.score);
+    document.getElementById("score-value").innerText = this.score.toString();
+  }
 
-  enemies : Enemy[] = [];
+
   preload() : void
   {
     this.load.setBaseURL("../assets");
@@ -231,7 +255,10 @@ export class AppComponent extends Phaser.Scene {
     newBullet.setVelocityX(settings.dir.x * settings.speed);
     newBullet.setVelocityY(settings.dir.y * settings.speed);
     this.bullets.push(new Bullet(newBullet, settings)); 
-    this.setHealth(this.health-1);
+    
+    //Teste
+    this.addHealth(-1);
+    this.addScore(Math.random() * 10);
   }
 }
 

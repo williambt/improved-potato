@@ -1,4 +1,4 @@
-import { Physics } from "phaser";
+import { Physics, Scene, Scenes } from "phaser";
 
 export class BulletSettings
 {
@@ -6,12 +6,14 @@ export class BulletSettings
     fireRate : number;
     angle : number;
     dir : Phaser.Math.Vector2;
-    constructor(speed : number, dir : Phaser.Math.Vector2, fireRate : number, angle : number) 
+    shouldHitPlayer : boolean;
+    constructor(speed : number, dir : Phaser.Math.Vector2, fireRate : number, angle : number, shouldHitPlayer: boolean = false) 
     {
         this.speed = speed;
         this.angle = angle;
         this.dir = dir;
         this.fireRate = fireRate;
+        this.shouldHitPlayer = shouldHitPlayer;
     }
 }
 
@@ -27,8 +29,6 @@ export class Bullet
     }
     update()
     {
-        // if (!this.bullet.body.onWorldBounds) {
-        //     this.bullet.destroy();
-        //   }                                         tem que dar um jeito de destruir o objeto quando fora da tela
+                                             //  tem que dar um jeito de destruir o objeto quando fora da tela
     }
 }

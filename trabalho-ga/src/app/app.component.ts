@@ -38,7 +38,10 @@ export class AppComponent extends Phaser.Scene {
   player : Physics.Arcade.Sprite;
   cursors : Phaser.Input.Keyboard.CursorKeys;
   fireKey : Phaser.Input.Keyboard.Key;
-  speed : number = 200;
+  precisionMovement : Phaser.Input.Keyboard.Key;
+  speed : number = 350;
+  maximumSpeed : number = 350;
+  precisionSpeed : number = 150;
 
   origin : Physics.Arcade.Sprite;
 
@@ -46,8 +49,9 @@ export class AppComponent extends Phaser.Scene {
 
   // player stats
   health : number = 100;
+  score : number = 0;
 
-  enemies : Enemy[] = [];
+  enemies : Physics.Arcade.Sprite[] = [];
   preload() : void
   {
     this.load.setBaseURL("../assets");
@@ -103,16 +107,21 @@ export class AppComponent extends Phaser.Scene {
     this.origin = this.physics.add.sprite(this.player.x, this.player.y, 'bullet2');
     this.cursors = this.input.keyboard.createCursorKeys();
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+    this.precisionMovement = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
-    this.enemies.push(new Enemy(this.physics.add.sprite(400 , -200, 'Enemy_big'))) ;
-    this.enemies.push(new Enemy( this.physics.add.sprite(200, -200, 'Enemy_medium')));
-    this.enemies.push(new Enemy(this.physics.add.sprite(600, -200, 'Enemy_small')));
+    this.enemies.push(this.physics.add.sprite(400 , -200, 'Enemy_big')) ;
+    this.enemies.push(this.physics.add.sprite(200, -200, 'Enemy_medium'));
+    this.enemies.push(this.physics.add.sprite(600, -200, 'Enemy_small'));
     
     this.enemies.forEach(enemy => {
-      enemy.enemyObject.body.allowGravity = false;
-      enemy.enemyObject.setVelocityY(100);
+      enemy.body.allowGravity = false;
+      enemy.setVelocityY(100);
+      this.physics.add.collider(this.player, enemy, () =>{
+        enemy.disableBody();
+        enemy.visible = false;
+        this.health -= 10;
+      });
     });
-    //this.
 
   }
 
@@ -121,11 +130,18 @@ export class AppComponent extends Phaser.Scene {
     this.handleInput();
     this.origin.x = this.player.x;
     this.origin.y = this.player.y;
-    if (this.bullets.length) 
+    if (this.bullets.length > 0) 
     {
       for(let bul of this.bullets)
       {
         bul.update();
+      }
+    }
+    if (this.enemies.length > 0) {
+      for (const enemy of this.enemies) {
+        if (enemy.y > this.gameConfig.height) {
+          enemy.y = -100;
+        }
       }
     }
   }
@@ -193,6 +209,14 @@ export class AppComponent extends Phaser.Scene {
         }
       }
     }
+    if (this.precisionMovement.isDown) 
+    {
+      this.speed = this.precisionSpeed;
+    }
+    else
+    {
+      this.speed = this.maximumSpeed;
+    }
   }
 
 
@@ -203,14 +227,23 @@ export class AppComponent extends Phaser.Scene {
     newBullet.angle = settings.angle;
     newBullet.body.allowGravity = false;
     //newBullet.body.collideWorldBounds = true;
-    newBullet.setVelocityX(settings.dir.x * settings.speed);
-    newBullet.setVelocityY(settings.dir.y * settings.speed);
+    newBullet.setVelocity(settings.dir.x * settings.speed,settings.dir.y * settings.speed);
+    this.physics.add.collider(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Physics.Arcade.Sprite) =>{
+      bullet.disableBody();
+      bullet.visible = false;
+      enemy.disableBody();
+      enemy.visible = false;
+      this.score += 10;
+    });
+    if (settings.shouldHitPlayer) {
+      this.physics.add.collider(newBullet, this.player, (bullet : Physics.Arcade.Sprite , player :  Physics.Arcade.Sprite) =>{
+        bullet.disableBody();
+        bullet.visible = false;
+        player.disableBody();
+        player.visible = false;
+        this.health -= 10;
+      });
+    }
     this.bullets.push(new Bullet(newBullet, settings)); 
   }
-}
-
-function collectStar(player, star : any) : void
-{
-  console.log(this.platforms);
-  star.disableBody(true, true);
 }

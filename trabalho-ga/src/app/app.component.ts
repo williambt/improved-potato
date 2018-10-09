@@ -24,8 +24,8 @@ export class AppComponent extends Phaser.Scene {
     title: environment.title,
     version: environment.version,
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 800,
     physics: {
       default: 'arcade',
       arcade: {
@@ -48,10 +48,34 @@ export class AppComponent extends Phaser.Scene {
   bulletSettings : BulletSettings = new BulletSettings(10, new Phaser.Math.Vector2(0,-90),1/3, -90);
 
   // player stats
-  health : number = 100;
   score : number = 0;
+  readonly maxHealth : number = 100;
+  health : number = this.maxHealth;
 
-  enemies : Physics.Arcade.Sprite[] = [];
+  setHealth(health : number) : void
+  {
+    this.health = health;
+    if(this.health > this.maxHealth) this.health = this.maxHealth;
+    else if (this.health < 0) this.health = 0;
+    this.setHealthBarStyle();
+  }
+
+  addHealth(ammount : number) : void
+  {
+    this.health += ammount;
+    if(this.health > this.maxHealth) this.health = this.maxHealth;
+    else if (this.health < 0) this.health = 0;
+    this.setHealthBarStyle();
+  }
+
+  setHealthBarStyle() : void
+  {
+    let healthBar : HTMLElement = (document.getElementById("health").getElementsByClassName("fore")[0] as HTMLElement);
+    healthBar.style.width = this.health / this.maxHealth * 100 + '%';
+    healthBar.style.backgroundColor = this.health > this.maxHealth / 2 ? 'green' : this.health > this.maxHealth / 5 ? 'yellow' : 'red';
+  }
+
+  enemies : Enemy[] = [];
   preload() : void
   {
     this.load.setBaseURL("../assets");
@@ -102,24 +126,24 @@ export class AppComponent extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(400, 500, 'player');
     this.player.setOrigin(0.5,0.5);
-    this.player.body.allowGravity = false;
+    (this.player.body as Phaser.Physics.Arcade.Body).allowGravity = false;
     this.player.setCollideWorldBounds(true);
     this.origin = this.physics.add.sprite(this.player.x, this.player.y, 'bullet2');
     this.cursors = this.input.keyboard.createCursorKeys();
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     this.precisionMovement = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
-    this.enemies.push(this.physics.add.sprite(400 , -200, 'Enemy_big')) ;
-    this.enemies.push(this.physics.add.sprite(200, -200, 'Enemy_medium'));
-    this.enemies.push(this.physics.add.sprite(600, -200, 'Enemy_small'));
+    this.enemies.push(this.physics.add.sprite(400 , -200, 'Enemy_big' ) as Enemy) ;
+    this.enemies.push(this.physics.add.sprite(200, -200, 'Enemy_medium') as Enemy);
+    this.enemies.push(this.physics.add.sprite(600, -200, 'Enemy_small') as Enemy);
     
     this.enemies.forEach(enemy => {
-      enemy.body.allowGravity = false;
+      (enemy.body as Phaser.Physics.Arcade.Body).allowGravity = false;
       enemy.setVelocityY(100);
       this.physics.add.collider(this.player, enemy, () =>{
         enemy.disableBody();
         enemy.visible = false;
-        this.health -= 10;
+        this.setHealth(this.health-10);
       });
     });
 
@@ -139,9 +163,7 @@ export class AppComponent extends Phaser.Scene {
     }
     if (this.enemies.length > 0) {
       for (const enemy of this.enemies) {
-        if (enemy.y > this.gameConfig.height) {
-          enemy.y = -100;
-        }
+        enemy.update();
       }
     }
   }
@@ -225,13 +247,13 @@ export class AppComponent extends Phaser.Scene {
   {
     let newBullet = this.physics.add.sprite(user.x, user.y, 'bullet1');
     newBullet.angle = settings.angle;
-    newBullet.body.allowGravity = false;
+    (newBullet.body as Phaser.Physics.Arcade.Body).allowGravity = false;
     //newBullet.body.collideWorldBounds = true;
     newBullet.setVelocity(settings.dir.x * settings.speed,settings.dir.y * settings.speed);
-    this.physics.add.collider(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Physics.Arcade.Sprite) =>{
+    this.physics.add.collider(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Enemy) =>{
       bullet.disableBody();
       bullet.visible = false;
-      enemy.disableBody();
+      enemy.setHealth(enemy.health - 50);
       enemy.visible = false;
       this.score += 10;
     });
@@ -241,9 +263,10 @@ export class AppComponent extends Phaser.Scene {
         bullet.visible = false;
         player.disableBody();
         player.visible = false;
-        this.health -= 10;
+        this.setHealth(this.health-10);
       });
     }
     this.bullets.push(new Bullet(newBullet, settings)); 
+    
   }
 }

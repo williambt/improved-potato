@@ -1,8 +1,13 @@
-<phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)">
-</phaser-component>
-<div>
-    <p>
-        Health: {{health}}
-        Score: {{score}}
-    </p>
+<div id="hud">
+    <div id="health">
+        <h2>HEALTH</h2>
+        <div class="back">
+            <div class="fore">
+            </div>
+        </div>
+        <p>{{health}}/{{maxHealth}}</p> 
+    </div>
+    <div id="game">
+        <phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)"></phaser-component>
+    </div>
 </div>

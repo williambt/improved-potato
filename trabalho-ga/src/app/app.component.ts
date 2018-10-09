@@ -47,11 +47,28 @@ export class AppComponent extends Phaser.Scene {
 
   bulletSettings : BulletSettings = new BulletSettings(10, new Phaser.Math.Vector2(0,-90),1/3, -90);
 
+  enemies : Enemy[] = [];
+
   // player stats
   score : number = 0;
   readonly maxHealth : number = 100;
   health : number = this.maxHealth;
 
+
+  //Use these to set HUD related values
+  setScore(score : number) : void
+  {
+    this.score = score;
+    this.updateScoreDisplay();
+  }
+
+  addScore(ammount : number) : void
+  {
+    this.score += ammount;
+    this.updateScoreDisplay();
+  }
+
+  
   setHealth(health : number) : void
   {
     this.health = health;
@@ -59,7 +76,7 @@ export class AppComponent extends Phaser.Scene {
     else if (this.health < 0) this.health = 0;
     this.setHealthBarStyle();
   }
-
+  
   addHealth(ammount : number) : void
   {
     this.health += ammount;
@@ -67,15 +84,21 @@ export class AppComponent extends Phaser.Scene {
     else if (this.health < 0) this.health = 0;
     this.setHealthBarStyle();
   }
-
+  
+  //HUD Updaters
   setHealthBarStyle() : void
   {
     let healthBar : HTMLElement = (document.getElementById("health").getElementsByClassName("fore")[0] as HTMLElement);
     healthBar.style.width = this.health / this.maxHealth * 100 + '%';
     healthBar.style.backgroundColor = this.health > this.maxHealth / 2 ? 'green' : this.health > this.maxHealth / 5 ? 'yellow' : 'red';
   }
+  updateScoreDisplay() : void
+  {
+    this.score = Math.floor(this.score);
+    document.getElementById("score-value").innerText = this.score.toString();
+  }
 
-  enemies : Enemy[] = [];
+
   preload() : void
   {
     this.load.setBaseURL("../assets");
@@ -268,5 +291,11 @@ export class AppComponent extends Phaser.Scene {
     }
     this.bullets.push(new Bullet(newBullet, settings)); 
     
+<<<<<<< HEAD
+=======
+    //Teste
+    this.addHealth(-1);
+    this.addScore(Math.random() * 10);
+>>>>>>> 39a90a6200205a8680d381ff9cdc8d80ce180ac2
   }
 }

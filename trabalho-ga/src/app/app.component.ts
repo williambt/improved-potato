@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-
 import { environment } from '../environments/environment';
 import { Physics } from 'phaser';
 import { Bullet, BulletSettings } from './Bullet'
-import { Enemy } from './Enemy';
+//import { Enemy } from './Enemy';
 /**
  * Application component.
  */
@@ -43,7 +42,6 @@ export class AppComponent extends Phaser.Scene {
   maximumSpeed : number = 350;
   precisionSpeed : number = 150;
 
-  origin : Physics.Arcade.Sprite;
 
   bulletSettings : BulletSettings = new BulletSettings(10, new Phaser.Math.Vector2(0,-90),1/3, -90);
 
@@ -95,7 +93,7 @@ export class AppComponent extends Phaser.Scene {
   updateScoreDisplay() : void
   {
     this.score = Math.floor(this.score);
-    document.getElementById("score-value").innerText = this.score.toString();
+    //document.getElementById("score-value").innerText = this.score.toString();
   }
 
 
@@ -151,14 +149,14 @@ export class AppComponent extends Phaser.Scene {
     this.player.setOrigin(0.5,0.5);
     (this.player.body as Phaser.Physics.Arcade.Body).allowGravity = false;
     this.player.setCollideWorldBounds(true);
-    this.origin = this.physics.add.sprite(this.player.x, this.player.y, 'bullet2');
     this.cursors = this.input.keyboard.createCursorKeys();
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     this.precisionMovement = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    
-    this.enemies.push(this.physics.add.sprite(400 , -200, 'Enemy_big' ) as Enemy) ;
-    this.enemies.push(this.physics.add.sprite(200, -200, 'Enemy_medium') as Enemy);
-    this.enemies.push(this.physics.add.sprite(600, -200, 'Enemy_small') as Enemy);
+    //let a = this.physics.add.sprite(100 , -200, 'Enemy_big' );
+    let b = new Enemy(this, 100 , -200, 'Enemy_big');
+    this.enemies.push(new Enemy(this, 100 , 200, 'Enemy_big' ));
+    this.enemies.push(new Enemy(this, 300,200, 'Enemy_medium'));
+    this.enemies.push(new Enemy(this, 500, 200, 'Enemy_small'));
     
     this.enemies.forEach(enemy => {
       (enemy.body as Phaser.Physics.Arcade.Body).allowGravity = false;
@@ -175,8 +173,6 @@ export class AppComponent extends Phaser.Scene {
   update() : void
   {
     this.handleInput();
-    this.origin.x = this.player.x;
-    this.origin.y = this.player.y;
     if (this.bullets.length > 0) 
     {
       for(let bul of this.bullets)
@@ -273,11 +269,12 @@ export class AppComponent extends Phaser.Scene {
     (newBullet.body as Phaser.Physics.Arcade.Body).allowGravity = false;
     //newBullet.body.collideWorldBounds = true;
     newBullet.setVelocity(settings.dir.x * settings.speed,settings.dir.y * settings.speed);
-    this.physics.add.collider(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Enemy) =>{
+    this.physics.add.collider(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Physics.Arcade.Sprite) =>{
+      let enemyRef : Enemy = enemy as Enemy;
       bullet.disableBody();
       bullet.visible = false;
-      enemy.setHealth(enemy.health - 50);
-      enemy.visible = false;
+      enemyRef.setHealth(enemyRef.health - 50);
+      enemyRef.visible = false;
       this.score += 10;
     });
     if (settings.shouldHitPlayer) {
@@ -291,11 +288,32 @@ export class AppComponent extends Phaser.Scene {
     }
     this.bullets.push(new Bullet(newBullet, settings)); 
     
-<<<<<<< HEAD
-=======
     //Teste
-    this.addHealth(-1);
-    this.addScore(Math.random() * 10);
->>>>>>> 39a90a6200205a8680d381ff9cdc8d80ce180ac2
+    // this.addHealth(-1);
+    // this.addScore(Math.random() * 10);
   }
+}
+
+export class Enemy extends Phaser.Physics.Arcade.Sprite
+{
+    health : number = 100;
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | integer) 
+    { 
+        super(scene, x, y, texture, frame); 
+        this.scene.add.existing(this);
+        this.scene.physics.add.existing(this);
+    }
+    setHealth(hp : number)
+    {
+        this.health = hp;
+    }
+    update() : void
+    {
+        if (this.y > (this.scene as AppComponent).gameConfig.height) {
+            this.y = -100;
+          }
+        if (this.health < 0) {
+            this.disableBody();
+        }
+    }
 }

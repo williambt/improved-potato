@@ -7,7 +7,7 @@
 /*! exports provided: name, version, scripts, private, dependencies, devDependencies, default */
 /***/ (function(module) {
 
-module.exports = {"name":"phangular","version":"1.0.0","scripts":{"ng":"ng","start":"ng serve","build":"ng build --prod --base-href \"/phangular/\"","test":"ng test","lint":"ng lint","e2e":"ng e2e","hmr":"ng serve --hmr --configuration=hmr","get-phaser-typings":"curl -o src/phaser.d.ts https://raw.githubusercontent.com/photonstorm/phaser3-docs/master/typescript/phaser.d.ts","postinstall":"npm run get-phaser-typings","angular-cli-ghpages":"angular-cli-ghpages","deploy":"npm run angular-cli-ghpages -- --dir dist/phangular"},"private":true,"dependencies":{"@angular/animations":"^6.1.0","@angular/common":"^6.1.0","@angular/compiler":"^6.1.0","@angular/core":"^6.1.0","@angular/forms":"^6.1.0","@angular/http":"^6.1.0","@angular/platform-browser":"^6.1.0","@angular/platform-browser-dynamic":"^6.1.0","@angular/router":"^6.1.0","@types/express":"^4.16.0","core-js":"^2.5.4","express":"^4.16.3","phaser":"^3.11.0","phaser-component-library":"^2.0.0","rxjs":"^6.0.0","zone.js":"^0.8.26"},"devDependencies":{"@angular-devkit/build-angular":"~0.7.0","@angular/cli":"~6.1.3","@angular/compiler-cli":"^6.1.0","@angular/language-service":"^6.1.0","@angularclass/hmr":"^2.1.3","@types/jasmine":"~2.8.6","@types/jasminewd2":"~2.0.3","@types/node":"~8.9.4","angular-cli-ghpages":"^0.5.3","codelyzer":"~4.2.1","jasmine-core":"~2.99.1","jasmine-spec-reporter":"~4.2.1","karma":"~1.7.1","karma-chrome-launcher":"~2.2.0","karma-coverage-istanbul-reporter":"~2.0.0","karma-jasmine":"~1.1.1","karma-jasmine-html-reporter":"^0.2.2","protractor":"~5.3.0","ts-node":"~5.0.1","tslint":"~5.9.1","typescript":"~2.9.2"}};
+module.exports = {"name":"phangular","version":"1.0.0","scripts":{"ng":"ng","start":"ng serve","build":"ng build --prod --base-href \"/phangular/\"","test":"ng test","lint":"ng lint","e2e":"ng e2e","hmr":"ng serve --hmr --configuration=hmr","get-phaser-typings":"curl -o src/phaser.d.ts https://raw.githubusercontent.com/photonstorm/phaser3-docs/master/typescript/phaser.d.ts","postinstall":"npm run get-phaser-typings","angular-cli-ghpages":"angular-cli-ghpages","deploy":"npm run angular-cli-ghpages -- --dir dist/phangular"},"private":true,"dependencies":{"@angular/animations":"^6.1.0","@angular/common":"^6.1.0","@angular/compiler":"^6.1.0","@angular/core":"^6.1.0","@angular/forms":"^6.1.0","@angular/http":"^6.1.0","@angular/platform-browser":"^6.1.0","@angular/platform-browser-dynamic":"^6.1.0","@angular/router":"^6.1.0","@types/express":"^4.16.0","body-parser":"^1.18.3","core-js":"^2.5.4","express":"^4.16.3","phaser":"^3.11.0","phaser-component-library":"^2.0.0","rxjs":"^6.0.0","zone.js":"^0.8.26"},"devDependencies":{"@angular-devkit/build-angular":"~0.7.0","@angular/cli":"~6.1.3","@angular/compiler-cli":"^6.1.0","@angular/language-service":"^6.1.0","@angularclass/hmr":"^2.1.3","@types/jasmine":"~2.8.6","@types/jasminewd2":"~2.0.3","@types/node":"~8.9.4","angular-cli-ghpages":"^0.5.3","codelyzer":"~4.2.1","jasmine-core":"~2.99.1","jasmine-spec-reporter":"~4.2.1","karma":"~1.7.1","karma-chrome-launcher":"~2.2.0","karma-coverage-istanbul-reporter":"~2.0.0","karma-jasmine":"~1.1.1","karma-jasmine-html-reporter":"^0.2.2","protractor":"~5.3.0","ts-node":"~5.0.1","tslint":"~5.9.1","typescript":"~2.9.2"}};
 
 /***/ }),
 
@@ -38,16 +38,16 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /*!***************************!*\
   !*** ./src/app/Bullet.ts ***!
   \***************************/
-/*! exports provided: BulletSettings, Bullet */
+/*! exports provided: BulletSettings */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BulletSettings", function() { return BulletSettings; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Bullet", function() { return Bullet; });
 var BulletSettings = /** @class */ (function () {
-    function BulletSettings(speed, dir, fireRate, angle, shouldHitPlayer) {
+    function BulletSettings(damage, speed, dir, fireRate, angle, shouldHitPlayer) {
         if (shouldHitPlayer === void 0) { shouldHitPlayer = false; }
+        this.damage = damage;
         this.speed = speed;
         this.angle = angle;
         this.dir = dir;
@@ -55,17 +55,6 @@ var BulletSettings = /** @class */ (function () {
         this.shouldHitPlayer = shouldHitPlayer;
     }
     return BulletSettings;
-}());
-
-var Bullet = /** @class */ (function () {
-    function Bullet(bullet, settings) {
-        this.settings = settings;
-        this.bullet = bullet;
-    }
-    Bullet.prototype.update = function () {
-        //  tem que dar um jeito de destruir o objeto quando fora da tela
-    };
-    return Bullet;
 }());
 
 
@@ -150,10 +139,10 @@ var AppComponent = /** @class */ (function (_super) {
             },
             scene: _this
         };
-        _this.speed = 350;
-        _this.maximumSpeed = 350;
+        _this.speed = 300;
+        _this.maximumSpeed = 300;
         _this.precisionSpeed = 150;
-        _this.bulletSettings = new _Bullet__WEBPACK_IMPORTED_MODULE_2__["BulletSettings"](10, new Phaser.Math.Vector2(0, -90), 1 / 3, -90);
+        _this.bulletSettings = new _Bullet__WEBPACK_IMPORTED_MODULE_2__["BulletSettings"](20, 10, new Phaser.Math.Vector2(0, -90), 1, -90);
         _this.enemies = [];
         // player stats
         _this.score = 0;
@@ -162,9 +151,11 @@ var AppComponent = /** @class */ (function (_super) {
         _this.fkUp = true;
         _this.clock = 0;
         _this.hasFired = false;
-        _this.bullets = [];
         return _this;
     }
+    AppComponent.prototype.addHealth = function (delta) {
+        this.health += delta;
+    };
     AppComponent.prototype.preload = function () {
         this.load.setBaseURL("../assets");
         this.load.image('sky', "sky.png");
@@ -194,7 +185,6 @@ var AppComponent = /** @class */ (function (_super) {
         });
     };
     AppComponent.prototype.create = function () {
-        var _this = this;
         this.add.image(0, 0, 'sky').setOrigin(0, 0);
         this.player = this.physics.add.sprite(400, 500, 'player');
         this.player.setOrigin(0.5, 0.5);
@@ -203,34 +193,52 @@ var AppComponent = /** @class */ (function (_super) {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
         this.precisionMovement = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        //let a = this.physics.add.sprite(100 , -200, 'Enemy_big' );
-        var b = new Enemy(this, 100, -200, 'Enemy_big');
-        this.enemies.push(new Enemy(this, 100, 200, 'Enemy_big'));
-        this.enemies.push(new Enemy(this, 300, 200, 'Enemy_medium'));
-        this.enemies.push(new Enemy(this, 500, 200, 'Enemy_small'));
+        this.createEnemies();
+    };
+    AppComponent.prototype.createEnemies = function () {
+        var _this = this;
+        this.enemies.push(new Enemy(this, 100, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 150, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 200, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 250, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 300, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 350, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 400, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 450, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 500, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 550, -200, 'Enemy_small'));
+        // this.enemies.push(new Enemy(this, 100, -200, 'Enemy_big' ));
+        // this.enemies.push(new Enemy(this, 300, -200, 'Enemy_medium'));
         this.enemies.forEach(function (enemy) {
             enemy.body.allowGravity = false;
-            enemy.setVelocityY(100);
+            enemy.setVelocityY(70);
             _this.physics.add.collider(_this.player, enemy, function () {
-                enemy.disableBody();
+                _this.addHealth(-10);
                 enemy.visible = false;
-                _this.health -= 10;
+                enemy.disableBody();
+                enemy.destroy();
             });
         });
     };
     AppComponent.prototype.update = function () {
         this.handleInput();
-        if (this.bullets.length > 0) {
-            for (var _i = 0, _a = this.bullets; _i < _a.length; _i++) {
-                var bul = _a[_i];
-                bul.update();
+        if (this.enemies.length > 0) {
+            var toDelete = [];
+            for (var i = 0; i < this.enemies.length; i++) {
+                if (this.enemies[i].active) {
+                    this.enemies[i].update();
+                }
+                else {
+                    toDelete.push(i);
+                }
+            }
+            for (var _i = 0, toDelete_1 = toDelete; _i < toDelete_1.length; _i++) {
+                var index = toDelete_1[_i];
+                this.enemies.splice(index, 1);
             }
         }
-        if (this.enemies.length > 0) {
-            for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
-                var enemy = _c[_b];
-                enemy.update();
-            }
+        else {
+            this.createEnemies();
         }
     };
     /**
@@ -261,8 +269,9 @@ var AppComponent = /** @class */ (function (_super) {
             this.player.setVelocityY(0);
         }
         if (!this.fkUp && this.fireKey.isUp) {
-            this.http.get('score').subscribe(function (data) { return console.log(data.data); }, function (error) { return console.log(error); }, function () { return console.log("Accessed!"); });
+            //this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
             this.fkUp = true;
+            this.http.post("/leaderboard", { score: this.score }).toPromise().then(function (res) { console.log(res); }).catch(function (error) { console.log(error); });
         }
         if (this.fireKey.isDown) {
             this.fkUp = false;
@@ -290,26 +299,18 @@ var AppComponent = /** @class */ (function (_super) {
         var newBullet = this.physics.add.sprite(user.x, user.y, 'bullet1');
         newBullet.angle = settings.angle;
         newBullet.body.allowGravity = false;
-        //newBullet.body.collideWorldBounds = true;
         newBullet.setVelocity(settings.dir.x * settings.speed, settings.dir.y * settings.speed);
-        this.physics.add.collider(newBullet, this.enemies, function (bullet, enemy) {
-            var enemyRef = enemy;
-            bullet.disableBody();
+        this.physics.add.overlap(newBullet, this.enemies, function (bullet, enemy) {
             bullet.visible = false;
-            enemyRef.setHealth(enemyRef.health - 50);
-            enemyRef.visible = false;
-            _this.score += 10;
+            bullet.disableBody();
+            bullet.destroy();
+            var enemyRef = enemy;
+            enemyRef.setHealth(enemyRef.health - settings.damage);
+            if (enemyRef.health < 0) {
+                enemyRef.visible = false;
+                _this.score += 10;
+            }
         });
-        if (settings.shouldHitPlayer) {
-            this.physics.add.collider(newBullet, this.player, function (bullet, player) {
-                bullet.disableBody();
-                bullet.visible = false;
-                player.disableBody();
-                player.visible = false;
-                _this.health -= 10;
-            });
-        }
-        this.bullets.push(new _Bullet__WEBPACK_IMPORTED_MODULE_2__["Bullet"](newBullet, settings));
     };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -326,20 +327,54 @@ var Enemy = /** @class */ (function (_super) {
     function Enemy(scene, x, y, texture, frame) {
         var _this = _super.call(this, scene, x, y, texture, frame) || this;
         _this.health = 100;
-        _this.scene.add.existing(_this);
-        _this.scene.physics.add.existing(_this);
+        _this.bulletSettings = new _Bullet__WEBPACK_IMPORTED_MODULE_2__["BulletSettings"](5, 5, new Phaser.Math.Vector2(0, 90), 10, -90);
+        _this.clock = 0;
+        _this.hasFired = false;
+        _this.scene.physics.add.existing(_this.scene.add.existing(_this));
+        if (Enemy.sceneRef == null) {
+            Enemy.sceneRef = scene;
+        }
         return _this;
     }
     Enemy.prototype.setHealth = function (hp) {
         this.health = hp;
     };
     Enemy.prototype.update = function () {
+        if (this.y > 0) {
+            if (!this.hasFired) {
+                this.fire(this, this.bulletSettings);
+                this.hasFired = true;
+            }
+            else {
+                this.clock += this.scene.game.loop.delta / 100;
+                if (this.clock > this.bulletSettings.fireRate) {
+                    this.clock = 0;
+                    this.hasFired = false;
+                }
+            }
+        }
+        if (this.y == 100) {
+            this.setVelocity(0);
+        }
         if (this.y > this.scene.gameConfig.height) {
             this.y = -100;
         }
         if (this.health < 0) {
             this.disableBody();
+            this.destroy();
         }
+    };
+    Enemy.prototype.fire = function (user, settings) {
+        var newBullet = this.scene.physics.add.sprite(user.x, user.y, 'bullet2');
+        newBullet.angle = settings.angle;
+        newBullet.body.allowGravity = false;
+        newBullet.setVelocity(settings.dir.x * settings.speed, settings.dir.y * settings.speed);
+        this.scene.physics.add.overlap(newBullet, this.scene.player, function (bullet, player) {
+            Enemy.sceneRef.addHealth(-settings.damage);
+            bullet.visible = false;
+            bullet.disableBody();
+            bullet.destroy();
+        });
     };
     return Enemy;
 }(Phaser.Physics.Arcade.Sprite));
@@ -598,7 +633,7 @@ else {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\willn\Desktop\Lixo\Weeb\improved-potato\trabalho-ga\src\main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! C:\Users\gabrielsouzas\Desktop\Exercicios\git\improved-potato\trabalho-ga\src\main.ts */"./src/main.ts");
 
 
 /***/ })

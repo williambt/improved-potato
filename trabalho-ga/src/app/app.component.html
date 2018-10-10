@@ -1,19 +1,27 @@
-<div id="hud">
-    <div id="score">
-        <h3>Score: &nbsp; <div id="score-value">{{score}}</div></h3>
-    </div>
-
-    <div id="health">
-        <h2>HEALTH</h2>
-        <div class="back">
-            <div class="fore" [ngStyle]="{'width': health / maxHealth * 100 + '%', 'background-color': health > maxHealth / 2 ? 'green' : health > maxHealth / 5 ? 'yellow' : 'red'}">
-            </div>
+<div>
+    <div id="hud">
+        <div id="score">
+            <h3>Score: &nbsp; <div id="score-value">{{score}}</div></h3>
         </div>
-        <p>{{health}}/{{maxHealth}}</p> 
+    
+        <div id="health">
+            <h2>HEALTH</h2>
+            <div class="back">
+                <div class="fore" [ngStyle]="{'width': health / maxHealth * 100 + '%', 'background-color': health > maxHealth / 2 ? 'green' : health > maxHealth / 5 ? 'yellow' : 'red'}">
+                </div>
+            </div>
+            <p>{{health}}/{{maxHealth}}</p> 
+        </div>
+        <div id="game">
+            <div *ngIf="gameover" id="name-input">
+                <h1 (click)="log()" >Game Over</h1>
+                <h3>Score: {{score}}</h3>
+                <p>Digite seu nome: </p><input maxlength="20" [(ngModel)]="name" type="text" name="fname">
+            </div>
+            <phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)"></phaser-component>
+        </div>
     </div>
-    <div id="game">
-        <phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)"></phaser-component>
+    <div *ngIf="true" >
+        <app-leaderboard></app-leaderboard>
     </div>
-
-    <app-leaderboard></app-leaderboard>
 </div>

@@ -54,10 +54,17 @@ export class AppComponent extends Phaser.Scene {
   score : number = 0;
   readonly maxHealth : number = 100;
   health : number = this.maxHealth;
+  gameover : boolean = false;
+
+  name : string;
 
   addHealth(delta : number)
   {
     this.health += delta;
+    if (this.health < 0) 
+    {
+      this.health = 0;
+    }
   }
 
   preload() : void
@@ -119,16 +126,14 @@ export class AppComponent extends Phaser.Scene {
   }
   createEnemies()
   {
-    this.enemies.push(new Enemy(this, 100, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 150, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 200, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 250, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 300, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 350, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 400, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 450, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 500, -200, 'Enemy_small'));
-    this.enemies.push(new Enemy(this, 550, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 70, -200,  'Enemy_big'));
+    this.enemies.push(new Enemy(this, 140, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 210, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 280, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 350, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 420, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 490, -200, 'Enemy_big'));
+    this.enemies.push(new Enemy(this, 560, -200, 'Enemy_big'));
     // this.enemies.push(new Enemy(this, 100, -200, 'Enemy_big' ));
     // this.enemies.push(new Enemy(this, 300, -200, 'Enemy_medium'));
     
@@ -146,7 +151,10 @@ export class AppComponent extends Phaser.Scene {
   }
   update() : void
   {
-    this.handleInput();
+    if (!this.gameover) 
+    {
+      this.handleInput();
+    }
     if (this.enemies.length > 0) {
       let toDelete : number[] = [];
       for (let i = 0; i < this.enemies.length; i++) {
@@ -165,7 +173,11 @@ export class AppComponent extends Phaser.Scene {
     else
     {
       this.createEnemies();
-    }  
+    } 
+    if (this.health <= 0)
+    {
+      this.gameover = true;  
+    } 
   }
 
   
@@ -175,6 +187,7 @@ export class AppComponent extends Phaser.Scene {
   public constructor(private http : HttpClient) 
   { 
     super({ key: 'sceneA', active: true });
+    
   }
   
   /**
@@ -221,8 +234,9 @@ export class AppComponent extends Phaser.Scene {
     
     if(!this.fkUp && this.fireKey.isUp)
     {
-      this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
+      //this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
       this.fkUp = true;
+      this.http.post("/leaderboard",{ score : this.score }).toPromise().then((res) => {console.log(res)}).catch((error) => {console.log(error)});
     }
 
     if(this.fireKey.isDown)
@@ -250,6 +264,12 @@ export class AppComponent extends Phaser.Scene {
     {
       this.speed = this.maximumSpeed;
     }
+
+    
+  }
+  log()
+  {
+    console.log(this.name);
   }
 
 
@@ -312,8 +332,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite
           }
         }
       }
-      if (this.y > (this.scene as AppComponent).gameConfig.height) {
-          this.y = -100;
+      if (this.y > 100 ) {
+        this.setVelocity(0);
       }
       if (this.health < 0) {
         this.disableBody();

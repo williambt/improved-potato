@@ -539,7 +539,7 @@ if(false) {}
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\willn\Desktop\Lixo\Weeb\improved-potato\trabalho-ga\src\styles.scss */"./src/styles.scss");
+module.exports = __webpack_require__(/*! C:\Users\gabrielsouzas\Desktop\Exercicios\git\improved-potato\trabalho-ga\src\styles.scss */"./src/styles.scss");
 
 
 /***/ })

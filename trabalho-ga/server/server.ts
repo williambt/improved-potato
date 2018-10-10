@@ -1,14 +1,15 @@
 import * as express from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
-
+import * as bp from 'body-parser';
 let dirname = path.dirname(require.main.filename) + '/phangular';
 
 let app : express.Application = express();
 let port = 8080;
 
 app.use(express.static(dirname));
-
+app.use(bp.json());
+app.use(bp.urlencoded({extended : true}));
 let json : any = null;
 
 fs.readFile('scores.json', (err : NodeJS.ErrnoException, data : Buffer) =>
@@ -30,5 +31,10 @@ app.get('/score', (req, res) => {
         res.send({status: 'ok', data: json.scores});
     }
 })
-
+app.post("/leaderboard", (req,res) =>{
+	console.log(req.body);
+	res.writeHead(200);
+	res.write('{"ok" : true}');
+	res.end();
+});
 app.listen(port, () => console.log('Listening on port ' + port));

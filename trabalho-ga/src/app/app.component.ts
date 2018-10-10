@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, enableProdMode } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Physics } from 'phaser';
 import { BulletSettings } from './Bullet'
-import { EmptyError } from 'rxjs';
+import { HttpClientModule, HttpClient, HttpErrorResponse } from '@angular/common/http';
+
 //import { Enemy } from './Enemy';
 /**
  * Application component.
@@ -52,51 +53,6 @@ export class AppComponent extends Phaser.Scene {
   score : number = 0;
   readonly maxHealth : number = 100;
   health : number = this.maxHealth;
-
-
-  //Use these to set HUD related values
-  setScore(score : number) : void
-  {
-    this.score = score;
-    this.updateScoreDisplay();
-  }
-
-  addScore(ammount : number) : void
-  {
-    this.score += ammount;
-    this.updateScoreDisplay();
-  }
-
-  
-  setHealth(health : number) : void
-  {
-    this.health = health;
-    if(this.health > this.maxHealth) this.health = this.maxHealth;
-    else if (this.health < 0) this.health = 0;
-    this.setHealthBarStyle();
-  }
-  
-  addHealth(ammount : number) : void
-  {
-    this.health += ammount;
-    if(this.health > this.maxHealth) this.health = this.maxHealth;
-    else if (this.health < 0) this.health = 0;
-    this.setHealthBarStyle();
-  }
-  
-  //HUD Updaters
-  setHealthBarStyle() : void
-  {
-    let healthBar : HTMLElement = (document.getElementById("health").getElementsByClassName("fore")[0] as HTMLElement);
-    healthBar.style.width = this.health / this.maxHealth * 100 + '%';
-    healthBar.style.backgroundColor = this.health > this.maxHealth / 2 ? 'green' : this.health > this.maxHealth / 5 ? 'yellow' : 'red';
-  }
-  updateScoreDisplay() : void
-  {
-    this.score = Math.floor(this.score);
-    //document.getElementById("score-value").innerText = this.score.toString();
-  }
-
 
   preload() : void
   {
@@ -163,7 +119,7 @@ export class AppComponent extends Phaser.Scene {
       this.physics.add.collider(this.player, enemy, () =>{
         enemy.disableBody();
         enemy.visible = false;
-        this.setHealth(this.health-10);
+        this.health -= 10;
       });
     });
 
@@ -192,7 +148,10 @@ export class AppComponent extends Phaser.Scene {
   /**
    * Instantiate application component.
    */
-  public constructor() { super({ key: 'sceneA', active: true }); }
+  public constructor(private http : HttpClient) 
+  { 
+    super({ key: 'sceneA', active: true });
+  }
   
   /**
    * Game ready event handler.
@@ -204,6 +163,7 @@ export class AppComponent extends Phaser.Scene {
   }
 
 
+  fkUp : boolean = true;
 
   clock : number = 0;
   hasFired : boolean = false;
@@ -235,8 +195,15 @@ export class AppComponent extends Phaser.Scene {
       this.player.setVelocityY(0);
     }
     
+    if(!this.fkUp && this.fireKey.isUp)
+    {
+      this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
+      this.fkUp = true;
+    }
+
     if(this.fireKey.isDown)
     {
+      this.fkUp = false;
       if (!this.hasFired) {
         this.fire(this.player, this.bulletSettings);
         this.hasFired = true;

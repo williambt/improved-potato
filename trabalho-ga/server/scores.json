@@ -1,6 +1,1 @@
-{
-	"scores": 
-	[
-		{"name":"fulano", "score":10000000}
-	]
-}
+{"scores":[{"name":"fulano","score":10000000},{"name":"Otro","score":70},{"name":"Gabriel","score":40},{"name":"Gabriel","score":40}]}

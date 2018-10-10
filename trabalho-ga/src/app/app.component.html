@@ -1,5 +1,7 @@
+<span (click) = "display = 'game'" class="tab" >Game</span>
+<span (click) = "display = 'leaderboard'" class="tab" >Leaderboards</span>
 <div>
-    <div id="hud">
+    <div id="hud" *ngIf="display == 'game'">
         <div id="score">
             <h3>Score: &nbsp; <div id="score-value">{{score}}</div></h3>
         </div>
@@ -13,15 +15,15 @@
             <p>{{health}}/{{maxHealth}}</p> 
         </div>
         <div id="game">
-            <div *ngIf="gameover" id="name-input">
-                <h1 (click)="log()" >Game Over</h1>
+            <div *ngIf="gameover" id="name-input"  >
+                <h1>Game Over</h1>
                 <h3>Score: {{score}}</h3>
-                <p>Digite seu nome: </p><input maxlength="20" [(ngModel)]="name" type="text" name="fname">
+                <p>Digite seu nome: </p><input (keyup) ="postScore($event)" maxlength="20" [(ngModel)]="name" type="text" name="fname">
             </div>
             <phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)"></phaser-component>
         </div>
     </div>
-    <div *ngIf="true" >
+    <div *ngIf="display == 'leaderboard'" >
         <app-leaderboard></app-leaderboard>
     </div>
 </div>

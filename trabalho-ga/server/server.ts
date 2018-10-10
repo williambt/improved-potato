@@ -7,6 +7,7 @@ let dirname = path.dirname(require.main.filename) + '/phangular';
 let app : express.Application = express();
 let port = 8080;
 
+
 app.use(express.static(dirname));
 app.use(bp.json());
 app.use(bp.urlencoded({extended : true}));
@@ -32,9 +33,12 @@ app.get('/score', (req, res) => {
     }
 })
 app.post("/leaderboard", (req,res) =>{
-	console.log(req.body);
+	json.scores.push(req.body);
 	res.writeHead(200);
 	res.write('{"ok" : true}');
 	res.end();
+	
+	let writeJson = JSON.stringify(json);
+	fs.writeFile('scores.json', writeJson, 'utf8', ()=> console.log("Written!"));
 });
 app.listen(port, () => console.log('Listening on port ' + port));

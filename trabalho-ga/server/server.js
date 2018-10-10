@@ -26,9 +26,11 @@ app.get('/score', function (req, res) {
     }
 });
 app.post("/leaderboard", function (req, res) {
-    console.log(req.body);
+    json.scores.push(req.body);
     res.writeHead(200);
     res.write('{"ok" : true}');
     res.end();
+    var writeJson = JSON.stringify(json);
+    fs.writeFile('scores.json', writeJson, 'utf8', function () { return console.log("Written!"); });
 });
 app.listen(port, function () { return console.log('Listening on port ' + port); });

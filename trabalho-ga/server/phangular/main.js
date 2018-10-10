@@ -68,7 +68,7 @@ var BulletSettings = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"hud\">\r\n    <div id=\"score\">\r\n        <h3>Score: &nbsp; <div id=\"score-value\">{{score}}</div></h3>\r\n    </div>\r\n\r\n    <div id=\"health\">\r\n        <h2>HEALTH</h2>\r\n        <div class=\"back\">\r\n            <div class=\"fore\" [ngStyle]=\"{'width': health / maxHealth * 100 + '%', 'background-color': health > maxHealth / 2 ? 'green' : health > maxHealth / 5 ? 'yellow' : 'red'}\">\r\n            </div>\r\n        </div>\r\n        <p>{{health}}/{{maxHealth}}</p> \r\n    </div>\r\n    <div id=\"game\">\r\n        <phaser-component [gameConfig]=\"gameConfig\" (gameReady)=\"onGameReady($event)\"></phaser-component>\r\n    </div>\r\n\r\n    <app-leaderboard></app-leaderboard>\r\n</div>"
+module.exports = "<span (click) = \"display = 'game'\" class=\"tab\" >Game</span>\r\n<span (click) = \"display = 'leaderboard'\" class=\"tab\" >Leaderboards</span>\r\n<div>\r\n    <div id=\"hud\" *ngIf=\"display == 'game'\">\r\n        <div id=\"score\">\r\n            <h3>Score: &nbsp; <div id=\"score-value\">{{score}}</div></h3>\r\n        </div>\r\n    \r\n        <div id=\"health\">\r\n            <h2>HEALTH</h2>\r\n            <div class=\"back\">\r\n                <div class=\"fore\" [ngStyle]=\"{'width': health / maxHealth * 100 + '%', 'background-color': health > maxHealth / 2 ? 'green' : health > maxHealth / 5 ? 'yellow' : 'red'}\">\r\n                </div>\r\n            </div>\r\n            <p>{{health}}/{{maxHealth}}</p> \r\n        </div>\r\n        <div id=\"game\">\r\n            <div *ngIf=\"gameover\" id=\"name-input\"  >\r\n                <h1>Game Over</h1>\r\n                <h3>Score: {{score}}</h3>\r\n                <p>Digite seu nome: </p><input (keyup) =\"postScore($event)\" maxlength=\"20\" [(ngModel)]=\"name\" type=\"text\" name=\"fname\">\r\n            </div>\r\n            <phaser-component [gameConfig]=\"gameConfig\" (gameReady)=\"onGameReady($event)\"></phaser-component>\r\n        </div>\r\n    </div>\r\n    <div *ngIf=\"display == 'leaderboard'\" >\r\n        <app-leaderboard></app-leaderboard>\r\n    </div>\r\n</div>"
 
 /***/ }),
 
@@ -142,19 +142,23 @@ var AppComponent = /** @class */ (function (_super) {
         _this.speed = 300;
         _this.maximumSpeed = 300;
         _this.precisionSpeed = 150;
+        _this.display = "game";
         _this.bulletSettings = new _Bullet__WEBPACK_IMPORTED_MODULE_2__["BulletSettings"](20, 10, new Phaser.Math.Vector2(0, -90), 1, -90);
         _this.enemies = [];
         // player stats
         _this.score = 0;
         _this.maxHealth = 100;
         _this.health = _this.maxHealth;
-        _this.fkUp = true;
+        _this.gameover = false;
         _this.clock = 0;
         _this.hasFired = false;
         return _this;
     }
     AppComponent.prototype.addHealth = function (delta) {
         this.health += delta;
+        if (this.health < 0) {
+            this.health = 0;
+        }
     };
     AppComponent.prototype.preload = function () {
         this.load.setBaseURL("../assets");
@@ -197,16 +201,14 @@ var AppComponent = /** @class */ (function (_super) {
     };
     AppComponent.prototype.createEnemies = function () {
         var _this = this;
-        this.enemies.push(new Enemy(this, 100, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 150, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 200, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 250, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 300, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 350, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 400, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 450, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 500, -200, 'Enemy_small'));
-        this.enemies.push(new Enemy(this, 550, -200, 'Enemy_small'));
+        this.enemies.push(new Enemy(this, 70, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 140, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 210, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 280, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 350, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 420, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 490, -200, 'Enemy_big'));
+        this.enemies.push(new Enemy(this, 560, -200, 'Enemy_big'));
         // this.enemies.push(new Enemy(this, 100, -200, 'Enemy_big' ));
         // this.enemies.push(new Enemy(this, 300, -200, 'Enemy_medium'));
         this.enemies.forEach(function (enemy) {
@@ -221,7 +223,9 @@ var AppComponent = /** @class */ (function (_super) {
         });
     };
     AppComponent.prototype.update = function () {
-        this.handleInput();
+        if (!this.gameover) {
+            this.handleInput();
+        }
         if (this.enemies.length > 0) {
             var toDelete = [];
             for (var i = 0; i < this.enemies.length; i++) {
@@ -240,6 +244,9 @@ var AppComponent = /** @class */ (function (_super) {
         else {
             this.createEnemies();
         }
+        if (this.health <= 0) {
+            this.gameover = true;
+        }
     };
     /**
      * Game ready event handler.
@@ -248,6 +255,11 @@ var AppComponent = /** @class */ (function (_super) {
      */
     AppComponent.prototype.onGameReady = function (game) {
         this.game = game;
+    };
+    AppComponent.prototype.postScore = function (event) {
+        if (event.key == "Enter") {
+            this.http.post("/leaderboard", { name: this.name, score: this.score }).toPromise().then(function (res) { console.log(res); }).catch(function (error) { console.log(error); });
+        }
     };
     AppComponent.prototype.handleInput = function () {
         if (this.cursors.left.isDown) {
@@ -268,13 +280,7 @@ var AppComponent = /** @class */ (function (_super) {
         else {
             this.player.setVelocityY(0);
         }
-        if (!this.fkUp && this.fireKey.isUp) {
-            //this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
-            this.fkUp = true;
-            this.http.post("/leaderboard", { score: this.score }).toPromise().then(function (res) { console.log(res); }).catch(function (error) { console.log(error); });
-        }
         if (this.fireKey.isDown) {
-            this.fkUp = false;
             if (!this.hasFired) {
                 this.fire(this.player, this.bulletSettings);
                 this.hasFired = true;
@@ -293,6 +299,9 @@ var AppComponent = /** @class */ (function (_super) {
         else {
             this.speed = this.maximumSpeed;
         }
+    };
+    AppComponent.prototype.log = function () {
+        console.log(this.name);
     };
     AppComponent.prototype.fire = function (user, settings) {
         var _this = this;
@@ -353,11 +362,8 @@ var Enemy = /** @class */ (function (_super) {
                 }
             }
         }
-        if (this.y == 100) {
+        if (this.y > 100) {
             this.setVelocity(0);
-        }
-        if (this.y > this.scene.gameConfig.height) {
-            this.y = -100;
         }
         if (this.health < 0) {
             this.disableBody();
@@ -399,6 +405,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
 /* harmony import */ var _leaderboard_leaderboard_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./leaderboard/leaderboard.component */ "./src/app/leaderboard/leaderboard.component.ts");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -408,6 +415,7 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+
 
 
 
@@ -435,7 +443,8 @@ var AppModule = /** @class */ (function () {
             imports: [
                 _angular_platform_browser__WEBPACK_IMPORTED_MODULE_1__["BrowserModule"],
                 phaser_component_library__WEBPACK_IMPORTED_MODULE_2__["PhaserModule"],
-                _angular_common_http__WEBPACK_IMPORTED_MODULE_5__["HttpClientModule"]
+                _angular_common_http__WEBPACK_IMPORTED_MODULE_5__["HttpClientModule"],
+                _angular_forms__WEBPACK_IMPORTED_MODULE_6__["FormsModule"]
             ],
             providers: [],
             bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]]
@@ -456,7 +465,7 @@ var AppModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<p>\r\n  leaderboard works!\r\n</p>\r\n"
+module.exports = "<div id=\"leaderboard\" >\r\n  <table>\r\n    <tr>\r\n      <th>Score:</th>\r\n    </tr>\r\n    <tr *ngFor= \"let score of leaderboard; index as i;\" >\r\n      <td> {{i}} </td>\r\n      <td> {{score.name}} </td>\r\n      <td> {{score.score}} </td>\r\n    </tr>\r\n  </table>\r\n</div>\r\n\r\n"
 
 /***/ }),
 
@@ -467,7 +476,7 @@ module.exports = "<p>\r\n  leaderboard works!\r\n</p>\r\n"
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "phaser-component {\n  margin: auto; }\n"
+module.exports = "#leaderboard {\n  margin: auto;\n  top: 0;\n  left: 0; }\n"
 
 /***/ }),
 
@@ -482,6 +491,7 @@ module.exports = "phaser-component {\n  margin: auto; }\n"
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LeaderboardComponent", function() { return LeaderboardComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -492,8 +502,19 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
+
 var LeaderboardComponent = /** @class */ (function () {
-    function LeaderboardComponent() {
+    function LeaderboardComponent(http) {
+        var _this = this;
+        this.http = http;
+        this.leaderboard = [];
+        this.http.get('score').subscribe(function (data) {
+            _this.leaderboard = data.data;
+            console.log(data);
+            _this.leaderboard.sort(function (a, b) {
+                return b.score - a.score;
+            });
+        }, function (error) { return console.log(error); });
     }
     LeaderboardComponent.prototype.ngOnInit = function () {
     };
@@ -503,7 +524,7 @@ var LeaderboardComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./leaderboard.component.html */ "./src/app/leaderboard/leaderboard.component.html"),
             styles: [__webpack_require__(/*! ./leaderboard.component.scss */ "./src/app/leaderboard/leaderboard.component.scss")]
         }),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
     ], LeaderboardComponent);
     return LeaderboardComponent;
 }());

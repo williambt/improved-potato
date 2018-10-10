@@ -45,6 +45,8 @@ export class AppComponent extends Phaser.Scene {
   maximumSpeed : number = 300;
   precisionSpeed : number = 150;
 
+  display : string = "game";
+
 
   bulletSettings : BulletSettings = new BulletSettings(20, 10, new Phaser.Math.Vector2(0,-90),1, -90);
 
@@ -199,9 +201,12 @@ export class AppComponent extends Phaser.Scene {
     this.game = game;
   }
 
-
-  fkUp : boolean = true;
-
+  public postScore(event)
+  {
+    if (event.key == "Enter") {
+      this.http.post("/leaderboard",{ name: this.name, score : this.score }).toPromise().then((res) => {console.log(res)}).catch((error) => {console.log(error)});      
+    }
+  }
   clock : number = 0;
   hasFired : boolean = false;
   handleInput()
@@ -231,17 +236,9 @@ export class AppComponent extends Phaser.Scene {
     {
       this.player.setVelocityY(0);
     }
-    
-    if(!this.fkUp && this.fireKey.isUp)
-    {
-      //this.http.get('score').subscribe((data : any) => console.log(data.data), (error : HttpErrorResponse) => console.log(error), () => console.log("Accessed!"));
-      this.fkUp = true;
-      this.http.post("/leaderboard",{ score : this.score }).toPromise().then((res) => {console.log(res)}).catch((error) => {console.log(error)});
-    }
 
     if(this.fireKey.isDown)
     {
-      this.fkUp = false;
       if (!this.hasFired) {
         this.fire(this.player, this.bulletSettings);
         this.hasFired = true;

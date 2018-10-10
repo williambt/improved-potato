@@ -3,6 +3,7 @@ import { environment } from '../environments/environment';
 import { Physics } from 'phaser';
 import { BulletSettings } from './Bullet'
 import { HttpClientModule, HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { EmptyError } from 'rxjs';
 
 //import { Enemy } from './Enemy';
 /**
@@ -40,12 +41,12 @@ export class AppComponent extends Phaser.Scene {
   cursors : Phaser.Input.Keyboard.CursorKeys;
   fireKey : Phaser.Input.Keyboard.Key;
   precisionMovement : Phaser.Input.Keyboard.Key;
-  speed : number = 350;
-  maximumSpeed : number = 350;
+  speed : number = 300;
+  maximumSpeed : number = 300;
   precisionSpeed : number = 150;
 
 
-  bulletSettings : BulletSettings = new BulletSettings(10, 10, new Phaser.Math.Vector2(0,-90),1, -90);
+  bulletSettings : BulletSettings = new BulletSettings(20, 10, new Phaser.Math.Vector2(0,-90),1, -90);
 
   enemies : Enemy[] = [];
 
@@ -53,6 +54,11 @@ export class AppComponent extends Phaser.Scene {
   score : number = 0;
   readonly maxHealth : number = 100;
   health : number = this.maxHealth;
+
+  addHealth(delta : number)
+  {
+    this.health += delta;
+  }
 
   preload() : void
   {
@@ -109,39 +115,57 @@ export class AppComponent extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     this.precisionMovement = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.enemies.push(new Enemy(this, 100 , 200, 'Enemy_big' ));
-    this.enemies.push(new Enemy(this, 300,200, 'Enemy_medium'));
-    this.enemies.push(new Enemy(this, 500, 200, 'Enemy_small'));
+    this.createEnemies();
+  }
+  createEnemies()
+  {
+    this.enemies.push(new Enemy(this, 100, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 150, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 200, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 250, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 300, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 350, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 400, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 450, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 500, -200, 'Enemy_small'));
+    this.enemies.push(new Enemy(this, 550, -200, 'Enemy_small'));
+    // this.enemies.push(new Enemy(this, 100, -200, 'Enemy_big' ));
+    // this.enemies.push(new Enemy(this, 300, -200, 'Enemy_medium'));
     
     this.enemies.forEach(enemy => {
       (enemy.body as Phaser.Physics.Arcade.Body).allowGravity = false;
-      enemy.setVelocityY(100);
+      enemy.setVelocityY(70);
       this.physics.add.collider(this.player, enemy, () =>{
-        enemy.disableBody();
+        this.addHealth(-10);
         enemy.visible = false;
-        this.health -= 10;
+        enemy.disableBody();
+        enemy.destroy();
       });
     });
 
   }
-
   update() : void
   {
     this.handleInput();
-    // if (this.bullets.length > 0) 
-    // {
-    //   for(let bul of this.bullets)
-    //   {
-    //     bul.update();
-    //   }
-    // }
     if (this.enemies.length > 0) {
-      for (const enemy of this.enemies) {
-        if (enemy.active) {
-          enemy.update();
+      let toDelete : number[] = [];
+      for (let i = 0; i < this.enemies.length; i++) {
+        if (this.enemies[i].active) {
+          this.enemies[i].update();
         }
+        else 
+        {
+          toDelete.push(i);
+        } 
+      }
+      for (const index of toDelete) {
+        this.enemies.splice(index,1);
       }
     }
+    else
+    {
+      this.createEnemies();
+    }  
   }
 
   
@@ -229,13 +253,11 @@ export class AppComponent extends Phaser.Scene {
   }
 
 
-  //bullets : Bullet[] = [];
   fire(user : Physics.Arcade.Sprite, settings : BulletSettings)
   {
     let newBullet = this.physics.add.sprite(user.x, user.y, 'bullet1');
     newBullet.angle = settings.angle;
     (newBullet.body as Phaser.Physics.Arcade.Body).allowGravity = false;
-    //newBullet.body.collideWorldBounds = true;
     newBullet.setVelocity(settings.dir.x * settings.speed,settings.dir.y * settings.speed);
     this.physics.add.overlap(newBullet, this.enemies, (bullet : Physics.Arcade.Sprite , enemy :  Physics.Arcade.Sprite) =>{
       bullet.visible = false;
@@ -249,20 +271,22 @@ export class AppComponent extends Phaser.Scene {
         this.score += 10;
       }
     });
-   // this.bullets.push(new Bullet(newBullet, settings)); 
   }
 }
 
 export class Enemy extends Phaser.Physics.Arcade.Sprite
 {
-    health : number = 150;
-    bulletSettings : BulletSettings = new BulletSettings(10, 10, new Phaser.Math.Vector2(0,90),5, -90);
-
+    health : number = 100;
+    bulletSettings : BulletSettings = new BulletSettings(5, 5, new Phaser.Math.Vector2(0,90),10, -90);
+    static sceneRef : AppComponent;
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | integer) 
     { 
         super(scene, x, y, texture, frame); 
         
         this.scene.physics.add.existing(this.scene.add.existing(this));
+        if (Enemy.sceneRef == null) {
+          Enemy.sceneRef =  scene as AppComponent;
+        }
     }
     setHealth(hp : number)
     {
@@ -272,21 +296,24 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite
     hasFired : boolean = false;
     update() : void
     {
+      if (this.y > 0) 
+      {
+        if (!this.hasFired) {
+          this.fire(this, this.bulletSettings);
+          this.hasFired = true;
+        }
+        else
+        {
+          this.clock += this.scene.game.loop.delta/100;
+          if (this.clock > this.bulletSettings.fireRate) 
+          {
+            this.clock = 0;
+            this.hasFired = false;
+          }
+        }
+      }
       if (this.y > (this.scene as AppComponent).gameConfig.height) {
           this.y = -100;
-      }
-      if (!this.hasFired) {
-        this.fire(this, this.bulletSettings);
-        this.hasFired = true;
-      }
-      else
-      {
-        this.clock += this.scene.game.loop.delta/100;
-        if (this.clock > this.bulletSettings.fireRate) 
-        {
-          this.clock = 0;
-          this.hasFired = false;
-        }
       }
       if (this.health < 0) {
         this.disableBody();
@@ -298,10 +325,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite
       let newBullet = this.scene.physics.add.sprite(user.x, user.y, 'bullet2');
       newBullet.angle = settings.angle;
       (newBullet.body as Phaser.Physics.Arcade.Body).allowGravity = false;
-      //newBullet.body.collideWorldBounds = true;
       newBullet.setVelocity(settings.dir.x * settings.speed,settings.dir.y * settings.speed);
       this.scene.physics.add.overlap(newBullet, (this.scene as AppComponent).player, (bullet : Physics.Arcade.Sprite , player :  Physics.Arcade.Sprite) =>{
-        (this.scene as AppComponent).addHealth(-settings.damage);
+        Enemy.sceneRef.addHealth(-settings.damage);
         bullet.visible = false;
         bullet.disableBody();
         bullet.destroy();

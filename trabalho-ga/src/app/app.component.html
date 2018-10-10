@@ -6,7 +6,7 @@
     <div id="health">
         <h2>HEALTH</h2>
         <div class="back">
-            <div class="fore">
+            <div class="fore" [ngStyle]="{'width': health / maxHealth * 100 + '%', 'background-color': health > maxHealth / 2 ? 'green' : health > maxHealth / 5 ? 'yellow' : 'red'}">
             </div>
         </div>
         <p>{{health}}/{{maxHealth}}</p> 
@@ -14,4 +14,6 @@
     <div id="game">
         <phaser-component [gameConfig]="gameConfig" (gameReady)="onGameReady($event)"></phaser-component>
     </div>
+
+    <app-leaderboard></app-leaderboard>
 </div>

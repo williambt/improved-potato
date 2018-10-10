@@ -5,6 +5,7 @@ import { PhaserModule } from 'phaser-component-library';
 
 import { AppComponent } from './app.component';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
+import { HttpClientModule } from '@angular/common/http';
 
 /**
  * Application module.
@@ -16,7 +17,8 @@ import { LeaderboardComponent } from './leaderboard/leaderboard.component';
   ],
   imports: [
     BrowserModule,
-    PhaserModule
+    PhaserModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
